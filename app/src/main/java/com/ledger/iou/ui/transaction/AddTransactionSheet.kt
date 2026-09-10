@@ -321,7 +321,7 @@ fun AddTransactionSheet(
                             style = MicroCapsStyle.copy(fontSize = 9.sp, color = ColorTextSecondary)
                         )
                         Text(
-                            text = personNameInput.ifBlank { "Tap to select debtor" },
+                            text = personNameInput.ifBlank { "Select or add debtor" },
                             style = TextStyle(
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.SemiBold,
