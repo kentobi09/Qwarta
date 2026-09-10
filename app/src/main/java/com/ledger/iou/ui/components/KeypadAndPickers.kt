@@ -50,32 +50,71 @@ fun MonospaceKeypad(
     onDecimalPoint: () -> Unit,
     onBackspace: () -> Unit,
     onClear: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    keyHeight: androidx.compose.ui.unit.Dp = 52.dp,
+    customBottomRow: (@Composable () -> Unit)? = null
 ) {
     val view = androidx.compose.ui.platform.LocalView.current
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // Keypad grid: 1-9, Decimal Point (.), 0, Backspace (DEL)
+        // Keypad grid: 1-9
         val rows = listOf(
             listOf("1", "2", "3"),
             listOf("4", "5", "6"),
-            listOf("7", "8", "9"),
-            listOf(".", "0", "DEL")
+            listOf("7", "8", "9")
         )
 
         rows.forEach { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 row.forEach { key ->
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(52.dp)
+                            .height(keyHeight)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(ColorSurfaceCard)
+                            .border(1.dp, ColorSurfaceBorder, RoundedCornerShape(8.dp))
+                            .clickable {
+                                view.playSoundEffect(android.view.SoundEffectConstants.CLICK)
+                                view.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+                                onDigitPress(key.toInt())
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = key,
+                            style = TextStyle(
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp,
+                                fontFeatureSettings = TABULAR_NUMERALS_SETTINGS,
+                                color = ColorTextPrimary
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        if (customBottomRow != null) {
+            customBottomRow()
+        } else {
+            // Standard bottom row: ., 0, DEL
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf(".", "0", "DEL").forEach { key ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(keyHeight)
                             .clip(RoundedCornerShape(8.dp))
                             .background(ColorSurfaceCard)
                             .border(1.dp, ColorSurfaceBorder, RoundedCornerShape(8.dp))
