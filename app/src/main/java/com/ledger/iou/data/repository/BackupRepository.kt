@@ -1,4 +1,4 @@
-﻿package com.ledger.iou.data.repository
+package com.ledger.iou.data.repository
 
 import android.content.Context
 import com.ledger.iou.data.model.PersonWithTransactions
@@ -23,7 +23,7 @@ object BackupRepository {
 
         file.bufferedWriter().use { writer ->
             // CSV Header
-            writer.write("Person Name,Phone Number,Transaction Date,Type,Amount (PHP),Due Date,Notes\n")
+            writer.write("Person Name,Phone Number,Transaction Date,Type,Principal (PHP),Interest (PHP),Total Due (PHP),Due Date,Notes\n")
 
             val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val dueDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -36,11 +36,19 @@ object BackupRepository {
                 for (tx in personWithTx.transactions) {
                     val dateStr = dateFormat.format(Date(tx.timestampEpoch))
                     val typeStr = if (tx.type == TransactionType.LENT) "LENT" else "REPAYMENT"
-                    val amountStr = String.format(Locale.US, "%.2f", tx.amount / 100.0)
+                    val principalStr = String.format(Locale.US, "%.2f", tx.amount / 100.0)
+                    val interestStr = if (tx.type == TransactionType.LENT) {
+                        String.format(Locale.US, "%.2f", tx.interestAmountCents / 100.0)
+                    } else "0.00"
+                    val totalDueStr = if (tx.type == TransactionType.LENT) {
+                        String.format(Locale.US, "%.2f", (tx.amount + tx.interestAmountCents) / 100.0)
+                    } else {
+                        principalStr
+                    }
                     val dueDateStr = tx.dueDateEpoch?.let { dueDateFormat.format(Date(it)) } ?: ""
                     val noteEscaped = escapeCsv(tx.note ?: "")
 
-                    writer.write("$nameEscaped,$phoneEscaped,$dateStr,$typeStr,$amountStr,$dueDateStr,$noteEscaped\n")
+                    writer.write("$nameEscaped,$phoneEscaped,$dateStr,$typeStr,$principalStr,$interestStr,$totalDueStr,$dueDateStr,$noteEscaped\n")
                 }
             }
         }

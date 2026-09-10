@@ -303,7 +303,10 @@ fun PersonDetailScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Column {
-                                        Text(text = "TOTAL LENT", style = MicroCapsStyle.copy(fontSize = 9.sp))
+                                        val interestSubtitle = if (debtor.totalInterestCents > 0) {
+                                            " (incl. ${LedgerRepository.formatCents(debtor.totalInterestCents, mask = isPrivacyMasked)} int)"
+                                        } else ""
+                                        Text(text = "TOTAL LENT$interestSubtitle", style = MicroCapsStyle.copy(fontSize = 9.sp))
                                         Spacer(modifier = Modifier.height(2.dp))
                                         AmountText(
                                             cents = debtor.totalLentCents,
@@ -724,8 +727,12 @@ private fun TimelineEntryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(horizontalAlignment = Alignment.End) {
+                    val hasInterest = isLent && tx.interestAmountCents > 0
+                    val totalLentEntry = tx.amount + tx.interestAmountCents
                     val amountSign = if (isLent) "+ " else "- "
-                    val formatted = LedgerRepository.formatCents(tx.amount, mask = isPrivacyMasked)
+                    val displayedAmount = if (isLent) totalLentEntry else tx.amount
+                    val formatted = LedgerRepository.formatCents(displayedAmount, mask = isPrivacyMasked)
+
                     Text(
                         text = if (isPrivacyMasked) formatted else "$amountSign$formatted",
                         style = TextStyle(
@@ -736,6 +743,20 @@ private fun TimelineEntryCard(
                             color = if (isLent) ColorTextPrimary else ColorAccentPositive
                         )
                     )
+
+                    if (hasInterest && !isPrivacyMasked) {
+                        Spacer(modifier = Modifier.height(1.dp))
+                        val rateLabel = tx.interestRatePercent?.let { "${it}%" } ?: "+${LedgerRepository.formatCents(tx.interestAmountCents)}"
+                        Text(
+                            text = "$rateLabel agreed int",
+                            style = TextStyle(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 10.sp,
+                                color = ColorAccentPositive
+                            )
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Bal: ${LedgerRepository.formatCents(item.runningBalanceCents, mask = isPrivacyMasked)}",

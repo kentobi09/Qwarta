@@ -31,8 +31,10 @@ data class LoanTransactionEntity(
     val id: String = UUID.randomUUID().toString(),
     val personId: String,
     val type: String, // "LENT" or "REPAYMENT"
-    val amount: Long, // in cents (e.g. $10.50 -> 1050)
+    val amount: Long, // principal amount in cents (e.g. ₱10.50 -> 1050)
     val note: String? = null,
     val dueDateEpoch: Long? = null,
+    val interestRatePercent: Double? = null, // e.g. 5.0 for 5%
+    val interestAmountCents: Long = 0L, // agreed interest in cents
     val timestampEpoch: Long = System.currentTimeMillis()
 )

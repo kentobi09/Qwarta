@@ -41,7 +41,7 @@ class LedgerRepository(
             // Sorted chronologically ASC
             for (tx in transactions) {
                 if (tx.type == TransactionType.LENT) {
-                    currentBalance += tx.amount
+                    currentBalance += (tx.amount + tx.interestAmountCents)
                 } else {
                     currentBalance -= tx.amount
                 }
@@ -59,7 +59,9 @@ class LedgerRepository(
         amountCents: Long,
         type: String,
         note: String?,
-        dueDateEpoch: Long?
+        dueDateEpoch: Long?,
+        interestRatePercent: Double? = null,
+        interestAmountCents: Long = 0L
     ): String {
         val targetPersonId = if (!personId.isNullOrBlank()) {
             personId
@@ -89,6 +91,8 @@ class LedgerRepository(
             amount = amountCents,
             note = note?.trim()?.ifBlank { null },
             dueDateEpoch = dueDateEpoch,
+            interestRatePercent = if (type == TransactionType.LENT) interestRatePercent else null,
+            interestAmountCents = if (type == TransactionType.LENT) interestAmountCents else 0L,
             timestampEpoch = System.currentTimeMillis()
         )
         dao.insertTransaction(transaction)

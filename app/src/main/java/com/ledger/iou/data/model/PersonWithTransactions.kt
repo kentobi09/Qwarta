@@ -12,10 +12,18 @@ data class PersonWithTransactions(
     )
     val transactions: List<LoanTransactionEntity> = emptyList()
 ) {
-    val totalLentCents: Long
+    val totalPrincipalLentCents: Long
         get() = transactions
             .filter { it.type == TransactionType.LENT }
             .sumOf { it.amount }
+
+    val totalInterestCents: Long
+        get() = transactions
+            .filter { it.type == TransactionType.LENT }
+            .sumOf { it.interestAmountCents }
+
+    val totalLentCents: Long
+        get() = totalPrincipalLentCents + totalInterestCents
 
     val totalRepaidCents: Long
         get() = transactions

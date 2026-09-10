@@ -58,6 +58,38 @@ class LedgerCalculationTest {
     }
 
     @Test
+    fun testAgreedInterestCalculations() {
+        val person = PersonEntity(id = "person-interest", name = "Juan")
+        val transactions = listOf(
+            LoanTransactionEntity(
+                id = "tx-int-1",
+                personId = "person-interest",
+                type = TransactionType.LENT,
+                amount = 100000L, // ₱1,000.00 principal
+                interestRatePercent = 10.0,
+                interestAmountCents = 10000L, // ₱100.00 agreed interest (10%)
+                timestampEpoch = 1000L
+            ),
+            LoanTransactionEntity(
+                id = "tx-int-2",
+                personId = "person-interest",
+                type = TransactionType.REPAYMENT,
+                amount = 50000L, // ₱500.00 repayment
+                timestampEpoch = 2000L
+            )
+        )
+
+        val personWithTx = PersonWithTransactions(person = person, transactions = transactions)
+
+        assertEquals(100000L, personWithTx.totalPrincipalLentCents)
+        assertEquals(10000L, personWithTx.totalInterestCents)
+        assertEquals(110000L, personWithTx.totalLentCents) // Principal + Interest = ₱1,100.00
+        assertEquals(50000L, personWithTx.totalRepaidCents) // ₱500.00 repaid
+        assertEquals(60000L, personWithTx.balanceCents) // Remaining balance = ₱600.00
+        assertFalse(personWithTx.isSettled)
+    }
+
+    @Test
     fun testSettledCalculation() {
         val person = PersonEntity(id = "person-2", name = "Bob")
         val transactions = listOf(

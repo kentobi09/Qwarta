@@ -13,7 +13,7 @@ import com.ledger.iou.data.model.PersonEntity
         PersonEntity::class,
         LoanTransactionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LedgerDatabase : RoomDatabase() {
@@ -24,13 +24,23 @@ abstract class LedgerDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: LedgerDatabase? = null
 
+        private val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE loan_transactions ADD COLUMN interestRatePercent REAL DEFAULT NULL")
+                db.execSQL("ALTER TABLE loan_transactions ADD COLUMN interestAmountCents INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getDatabase(context: Context): LedgerDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     LedgerDatabase::class.java,
                     "ledger_database.db"
-                ).fallbackToDestructiveMigration().build()
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
