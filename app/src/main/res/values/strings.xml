@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Ledger</string>
+    <string name="notification_channel_name">Debt &amp; Loan Reminders</string>
+    <string name="notification_channel_desc">Notifications for upcoming and overdue personal debts</string>
+</resources>
