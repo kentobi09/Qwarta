@@ -64,6 +64,7 @@ fun SettingsScreen(
 
     var showLegalDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
+    var isSavingToDownloads by remember { mutableStateOf(false) }
 
     // System Save to Device document launcher
     val createDocumentLauncher = rememberLauncherForActivityResult(
@@ -187,15 +188,31 @@ fun SettingsScreen(
                         // 1. Save directly to device storage / downloads
                         SettingsActionRow(
                             icon = Icons.Default.SaveAlt,
-                            title = "Save CSV to Device",
-                            subtitle = "Save offline spreadsheet directly to your phone's storage",
-                            actionLabel = "SAVE",
+                            title = "Save CSV to Downloads",
+                            subtitle = "Save offline spreadsheet directly to your phone's Downloads folder",
+                            actionLabel = if (isSavingToDownloads) "SAVING..." else "SAVE",
                             onClick = {
                                 if (allDebtors.isEmpty()) {
                                     Toast.makeText(context, "Qwarta is currently empty", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-                                    createDocumentLauncher.launch("Qwarta_Backup_$timestamp.csv")
+                                    isSavingToDownloads = true
+                                    coroutineScope.launch {
+                                        try {
+                                            val savedPath = BackupRepository.saveCsvToDownloads(context, allDebtors)
+                                            Toast.makeText(context, "Saved to $savedPath", Toast.LENGTH_LONG).show()
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("QwartaExport", "Save to downloads failed", e)
+                                            // Fallback to document picker if needed
+                                            try {
+                                                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                                                createDocumentLauncher.launch("Qwarta_Backup_$timestamp.csv")
+                                            } catch (pickerErr: Exception) {
+                                                Toast.makeText(context, "Save error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                            }
+                                        } finally {
+                                            isSavingToDownloads = false
+                                        }
+                                    }
                                 }
                             }
                         )

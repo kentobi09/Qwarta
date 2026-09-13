@@ -61,6 +61,37 @@ object BackupRepository {
         file
     }
 
+    suspend fun saveCsvToDownloads(
+        context: Context,
+        data: List<PersonWithTransactions>
+    ): String = withContext(Dispatchers.IO) {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "Qwarta_Backup_$timestamp.csv"
+        val csvContent = generateCsvContent(data)
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val contentValues = android.content.ContentValues().apply {
+                put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "text/csv")
+                put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS)
+            }
+            val uri = context.contentResolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw IllegalStateException("Could not create file in Downloads")
+            
+            context.contentResolver.openOutputStream(uri)?.use { output ->
+                output.write(csvContent.toByteArray(Charsets.UTF_8))
+                output.flush()
+            } ?: throw IllegalStateException("Could not write to file in Downloads")
+            "Downloads/$fileName"
+        } else {
+            val downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+            downloadsDir.mkdirs()
+            val file = File(downloadsDir, fileName)
+            file.writeText(csvContent, Charsets.UTF_8)
+            file.absolutePath
+        }
+    }
+
     private fun escapeCsv(value: String): String {
         return if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
             "\"" + value.replace("\"", "\"\"") + "\""
