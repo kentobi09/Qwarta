@@ -265,7 +265,7 @@ private fun BiometricLockOverlay(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "LEDGER LOCKED",
+                text = "QWARTA LOCKED",
                 style = MicroCapsStyle.copy(fontSize = 13.sp, color = ColorTextPrimary)
             )
 

@@ -218,7 +218,7 @@ fun SettingsScreen(
                     ) {
                         Column {
                             Text(
-                                text = "LEDGER / IOU TRACKER",
+                                text = "QWARTA / IOU TRACKER",
                                 style = TextStyle(
                                     fontFamily = FontFamily.SansSerif,
                                     fontSize = 13.sp,

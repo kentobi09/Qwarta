@@ -28,18 +28,18 @@ fun UnifiedLegalAgreementDialog(
 ) {
     val fullLegalAgreementText = """
         1. NOT A LENDING INSTITUTION OR BANK
-        Ledger is strictly an offline personal notebook and digital calculator utility designed exclusively for informal record-keeping of personal loans and borrowings between consenting individuals.
+        Qwarta is strictly an offline personal notebook and digital calculator utility designed exclusively for informal record-keeping of personal loans and borrowings between consenting individuals.
         
-        Ledger is NOT a bank, quasi-bank, financing company, credit agency, pawnshop, or licensed lending company under Philippine Republic Act No. 9474 (Lending Company Regulation Act of 2007) or Bangko Sentral ng Pilipinas (BSP) / Securities and Exchange Commission (SEC) regulations.
+        Qwarta is NOT a bank, quasi-bank, financing company, credit agency, pawnshop, or licensed lending company under Philippine Republic Act No. 9474 (Lending Company Regulation Act of 2007) or Bangko Sentral ng Pilipinas (BSP) / Securities and Exchange Commission (SEC) regulations.
         
         2. NO FINANCIAL TRANSACTIONS OR MONEY HANDLING
-        Ledger does not originate, disburse, collect, transfer, or process money. It does not solicit deposits, issue credit, or perform credit scoring. All records are purely reflective of manual entries typed by the device owner.
+        Qwarta does not originate, disburse, collect, transfer, or process money. It does not solicit deposits, issue credit, or perform credit scoring. All records are purely reflective of manual entries typed by the device owner.
         
         3. NO LIABILITY FOR DISPUTES & "AS-IS" WARRANTY
-        The developer and publisher of Ledger assume NO responsibility or legal liability for disputes, unpaid debts, misunderstandings, inaccuracies in user entry, lost records, or broken agreements between borrowers and lenders. Ledger is provided "as-is" without warranties of any kind.
+        The developer and publisher of Qwarta assume NO responsibility or legal liability for disputes, unpaid debts, misunderstandings, inaccuracies in user entry, lost records, or broken agreements between borrowers and lenders. Qwarta is provided "as-is" without warranties of any kind.
         
         4. 100% OFFLINE PRIVACY GUARANTEE
-        Ledger operates completely offline. No personal data, contacts, debt amounts, timestamps, or usage analytics are ever sent to remote servers or third parties. All records reside exclusively within an isolated SQLite database on your device.
+        Qwarta operates completely offline. No personal data, contacts, debt amounts, timestamps, or usage analytics are ever sent to remote servers or third parties. All records reside exclusively within an isolated SQLite database on your device.
         
         5. USER RESPONSIBILITY & DATA BACKUP
         You are solely responsible for the accuracy of names and amounts you record and for regularly creating backups using the CSV export feature.
@@ -103,7 +103,7 @@ fun UnifiedLegalAgreementDialog(
             ) {
                 if (isOnboarding) {
                     Text(
-                        text = "Before using Ledger, please scroll down and read through the terms to continue.",
+                        text = "Before using Qwarta, please scroll down and read through the terms to continue.",
                         style = TextStyle(
                             fontFamily = FontFamily.SansSerif,
                             fontSize = 12.sp,

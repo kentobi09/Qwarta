@@ -315,7 +315,7 @@ private fun DashboardTopBar(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "LEDGER",
+                    text = "QWARTA",
                     style = TextStyle(
                         fontFamily = FontFamily.SansSerif,
                         fontWeight = FontWeight.Black,
