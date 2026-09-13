@@ -72,16 +72,17 @@ fun SettingsScreen(
         if (uri != null) {
             coroutineScope.launch {
                 try {
+                    val csvString = BackupRepository.generateCsvContent(allDebtors)
                     withContext(Dispatchers.IO) {
-                        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                            outputStream.bufferedWriter().use { writer ->
-                                writer.write(BackupRepository.generateCsvContent(allDebtors))
-                            }
-                        }
+                        context.contentResolver.openOutputStream(uri, "wt")?.use { outputStream ->
+                            outputStream.write(csvString.toByteArray(Charsets.UTF_8))
+                            outputStream.flush()
+                        } ?: throw IllegalStateException("Could not open destination file stream")
                     }
                     Toast.makeText(context, "CSV file saved to your device", Toast.LENGTH_LONG).show()
                 } catch (e: Exception) {
-                    Toast.makeText(context, "Save error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("QwartaExport", "Save to device failed", e)
+                    Toast.makeText(context, "Save error: ${e.localizedMessage ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
                 }
             }
         }

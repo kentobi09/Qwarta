@@ -31,7 +31,7 @@ object BiometricAuthHelper {
 
     fun showBiometricPrompt(
         activity: FragmentActivity,
-        title: String = "Unlock Ledger",
+        title: String = "Unlock Qwarta",
         subtitle: String = "Authenticate to access personal debt records",
         onSuccess: () -> Unit,
         onError: (String) -> Unit
