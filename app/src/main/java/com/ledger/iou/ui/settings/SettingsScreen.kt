@@ -2,7 +2,10 @@ package com.ledger.iou.ui.settings
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,7 +40,12 @@ import com.ledger.iou.ui.components.HairlineCard
 import com.ledger.iou.ui.components.HairlineDivider
 import com.ledger.iou.ui.components.MicroCapsLabel
 import com.ledger.iou.ui.theme.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +64,28 @@ fun SettingsScreen(
 
     var showLegalDialog by remember { mutableStateOf(false) }
     var isExporting by remember { mutableStateOf(false) }
+
+    // System Save to Device document launcher
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            coroutineScope.launch {
+                try {
+                    withContext(Dispatchers.IO) {
+                        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                            outputStream.bufferedWriter().use { writer ->
+                                writer.write(BackupRepository.generateCsvContent(allDebtors))
+                            }
+                        }
+                    }
+                    Toast.makeText(context, "CSV file saved to your device", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Save error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -153,14 +183,33 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 HairlineCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth()) {
+                        // 1. Save directly to device storage / downloads
                         SettingsActionRow(
-                            icon = Icons.Default.FileDownload,
-                            title = "Export Ledger to CSV",
-                            subtitle = "Generate offline backup spreadsheet of all records",
-                            actionLabel = if (isExporting) "EXPORTING..." else "EXPORT",
+                            icon = Icons.Default.SaveAlt,
+                            title = "Save CSV to Device",
+                            subtitle = "Save offline spreadsheet directly to your phone's storage",
+                            actionLabel = "SAVE",
                             onClick = {
                                 if (allDebtors.isEmpty()) {
-                                    Toast.makeText(context, "Ledger is currently empty", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Qwarta is currently empty", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                                    createDocumentLauncher.launch("Qwarta_Backup_$timestamp.csv")
+                                }
+                            }
+                        )
+
+                        HairlineDivider()
+
+                        // 2. Share / Send via other apps
+                        SettingsActionRow(
+                            icon = Icons.Default.Share,
+                            title = "Share CSV Spreadsheet",
+                            subtitle = "Send via Drive, email, messaging, or cloud apps",
+                            actionLabel = if (isExporting) "EXPORTING..." else "SHARE",
+                            onClick = {
+                                if (allDebtors.isEmpty()) {
+                                    Toast.makeText(context, "Qwarta is currently empty", Toast.LENGTH_SHORT).show()
                                 } else {
                                     isExporting = true
                                     coroutineScope.launch {
@@ -176,7 +225,7 @@ fun SettingsScreen(
                                                 putExtra(Intent.EXTRA_STREAM, fileUri)
                                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                             }
-                                            context.startActivity(Intent.createChooser(shareIntent, "Share Ledger CSV Backup"))
+                                            context.startActivity(Intent.createChooser(shareIntent, "Share Qwarta CSV Backup"))
                                         } catch (e: Exception) {
                                             Toast.makeText(context, "Export error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                                         } finally {
